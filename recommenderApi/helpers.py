@@ -1,4 +1,6 @@
 import numpy as np
+from django.utils.crypto import get_random_string
+from recommenderApi.validators import *
 mapping_dict = {
     'ind_empleado': {-99: 0, 'N': 1, 'B': 2, 'F': 3, 'A': 4, 'S': 5},
     'sexo': {'V': 0, 'H': 1, -99: 2},
@@ -51,6 +53,32 @@ product_mapping = {
     'ind_nom_pens_ult1': 'Pensions',
     'ind_recibo_ult1': 'Direct Debit'
 }
+
+
+def extractDataFromInput(input):
+    info = {
+        'fecha_dato': '2016-06-28',
+        'ncodpers': get_random_string(8),
+        'age': validateAge(input['age']) if "age" in input else '',
+        'sexo': validateGender(input['gender'], mapping_dict) if "gender" in input else '',
+        'pais_residencia': validateCountry(input['country'], mapping_dict) if "country" in input else '',
+        'antiguedad': validateSeniority(input['seniority']) if "seniority" in input else '',
+        'ind_actividad_cliente': validateActiveLevel(input['activity_level'], mapping_dict) if "activity_level" in input else '',
+        'segmento': validateSegment(input['segment'], mapping_dict) if "segment" in input else '',
+        'renta': validateIncome(input['annual_income']) if "annual_income" in input else '',
+        'tiprel_1mes': validateRelationship(input['relationship_type'], mapping_dict) if "relationship_type" in input else '',
+        'indfall': 'N',
+        'tipodom': '1',
+        'ind_empleado': 'F',
+        'canal_entrada': '',
+        'ind_nuevo': '',
+        'indrel': '',
+        'indrel_1mes': '1',
+        'indresi': '',
+        'indext': '',
+        'conyuemp': ''
+    }
+    return info
 
 
 def getTarget(row):
@@ -141,7 +169,7 @@ def mapProduct(product_code):
     }
 
 
-def filterData(data, cust_dict):
+def filterData(data, product_history,cust_dict):
     x_vars_list = []
     row = data
     cust_id = (row['ncodpers'])
@@ -165,5 +193,7 @@ def filterData(data, cust_dict):
                 if prod > 0:
                     assert len(prev_target_list) == 22
                     x_vars_list.append(x_vars+prev_target_list)
-    # x_vars_list[0][products_indexes['ind_cco_fin_ult1']] = 1
+    for product in list(product_history):
+        if product in products_indexes.keys():
+            x_vars_list[0][products_indexes[product]] = 1
     return x_vars_list
