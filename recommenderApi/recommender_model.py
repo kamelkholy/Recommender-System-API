@@ -8,10 +8,7 @@ file_path = os.path.join(module_dir, 'baz.txt')
 
 def load_model():
     module_dir = os.path.dirname(__file__)  # get current directory
-    print(module_dir)
-    file_path = os.path.join(module_dir, 'models\\trained\\model.json')
-    print(file_path)
-
+    file_path = os.path.join(module_dir, 'models/trained/model.json')
     model = xgb.Booster()
     model.load_model(file_path)
     return model
